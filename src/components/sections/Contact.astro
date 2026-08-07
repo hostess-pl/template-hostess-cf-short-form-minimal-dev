@@ -1,0 +1,69 @@
+---
+import siteConfig from '@/config/site.config';
+import { content } from '@/config/content';
+import ContactForm from '@/components/ui/forms/ContactForm.astro';
+import SocialIcon from '@/components/ui/SocialIcon.astro';
+import { locales } from '@/config/site.config';
+
+const contactLabel: Record<(typeof locales)[number], string> = {
+  en: 'Contact',
+  pl: 'Kontakt',
+  es: 'Contacto',
+};
+
+const socials = [
+  { name: 'instagram' as const, url: siteConfig.instagram, label: 'Instagram' },
+  { name: 'facebook' as const, url: siteConfig.facebook, label: 'Facebook' },
+  { name: 'linkedin' as const, url: siteConfig.linkedin, label: 'LinkedIn' },
+  { name: 'tiktok' as const, url: siteConfig.tiktok, label: 'TikTok' },
+].filter((s) => Boolean(String(s.url || '').trim()));
+---
+
+<section id="contact" data-review-id="contact-section" class="py-16 md:py-24">
+  <div class="container">
+    <div class="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+      <div>
+        {locales.map((locale) => (
+          <p class="section-label mb-3" data-lang={locale}>{contactLabel[locale]}</p>
+        ))}
+        <h2 class="font-display text-3xl text-foreground md:text-4xl">
+          {locales.map((locale) => (
+            <span data-lang={locale}>{content.contact[locale].title}</span>
+          ))}
+        </h2>
+        <p class="mt-4 text-lg text-foreground-muted">
+          {locales.map((locale) => (
+            <span data-lang={locale}>{content.contact[locale].subtitle}</span>
+          ))}
+        </p>
+
+        <div class="mt-10 space-y-5">
+          <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-foreground-subtle">
+            {locales.map((locale) => (
+              <span data-lang={locale}>{content.contact[locale].directTitle}</span>
+            ))}
+          </h3>
+          <a href={`mailto:${siteConfig.email}`} data-review-target="contact-email" class="block text-sm text-foreground transition-colors hover:text-accent sm:text-base">
+            {siteConfig.email}
+          </a>
+          <div class="flex flex-wrap gap-4 text-sm">
+            {socials.map((social) => (
+              <a
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1.5 text-foreground-muted transition-colors hover:text-accent"
+                aria-label={social.label}
+              >
+                <SocialIcon name={social.name} size={14} />
+                <span>{social.label}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <ContactForm />
+    </div>
+  </div>
+</section>

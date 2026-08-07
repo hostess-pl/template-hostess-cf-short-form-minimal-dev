@@ -1,0 +1,53 @@
+---
+import siteConfig from '@/config/site.config';
+import { content } from '@/config/content';
+import { locales } from '@/config/site.config';
+import SocialIcon from '@/components/ui/SocialIcon.astro';
+
+const year = new Date().getFullYear();
+
+const socials = [
+  { name: 'instagram' as const, url: siteConfig.instagram, label: 'Instagram' },
+  { name: 'facebook' as const, url: siteConfig.facebook, label: 'Facebook' },
+  { name: 'linkedin' as const, url: siteConfig.linkedin, label: 'LinkedIn' },
+  { name: 'tiktok' as const, url: siteConfig.tiktok, label: 'TikTok' },
+].filter((s) => Boolean(String(s.url || '').trim()));
+---
+
+<footer class="border-t border-border bg-background-secondary/50 py-10">
+  <div class="container flex max-w-md flex-col items-center justify-center gap-4 px-6 text-center text-sm text-foreground-muted md:max-w-none md:flex-row md:items-center md:justify-between md:px-8 md:text-left">
+    <div class="leading-relaxed">
+      <p>
+        © {year}{siteConfig.personName ? ` ${siteConfig.personName}.` : '.'}
+        {locales.map((locale) => (
+          <span data-lang={locale}> {content.footer[locale].rights}</span>
+        ))}
+      </p>
+      <p class="mt-1">
+        {locales.map((locale) => (
+          <span data-lang={locale}>
+            {content.footer[locale].siteBy}{' '}
+            <a href="https://hostesswebs.pl" target="_blank" rel="noopener noreferrer" class="text-foreground transition-colors hover:text-accent">
+              hostesswebs.pl
+            </a>
+          </span>
+        ))}
+      </p>
+    </div>
+    <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+      <a href={`mailto:${siteConfig.email}`} class="transition-colors hover:text-accent">{siteConfig.email}</a>
+      {socials.map((social) => (
+        <a
+          href={social.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1.5 transition-colors hover:text-accent"
+          aria-label={social.label}
+        >
+          <SocialIcon name={social.name} size={14} />
+          <span>{social.label}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</footer>
