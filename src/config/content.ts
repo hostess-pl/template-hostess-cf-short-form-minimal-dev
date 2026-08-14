@@ -1,5 +1,6 @@
 import type { ImageMetadata } from 'astro';
 import type { Locale } from './site.config';
+import { publicCopyForLocale } from '@/lib/cms/i18n';
 import { loadHostess } from '@/lib/hostess';
 
 let _bundleRef: ReturnType<typeof loadHostess> | null = null
@@ -328,33 +329,7 @@ function buildContentBundle() {
     hostess.copyByLocale && typeof hostess.copyByLocale === 'object' ? hostess.copyByLocale : {};
 
   function copyFor(locale: Locale) {
-    const localized = (copyByLocale as Record<string, typeof hostessCopy>)[locale];
-    const pl = (copyByLocale as Record<string, typeof hostessCopy>).pl;
-    const bucketEmpty =
-      !localized ||
-      typeof localized !== 'object' ||
-      !Object.values(localized as Record<string, unknown>).some((v) => String(v || '').trim());
-    const base = !bucketEmpty ? localized : pl ?? hostessCopy;
-    const pick = (key: string) => {
-      const fromBase = base && typeof base === 'object' ? (base as Record<string, unknown>)[key] : '';
-      const fromFlat = (hostessCopy as Record<string, unknown>)[key];
-      return String(fromBase || fromFlat || '').trim();
-    };
-    return {
-      headline: pick('headline'),
-      greeting: pick('greeting'),
-      profile: pick('profile'),
-      aboutLead: pick('aboutLead'),
-      experienceSummary: pick('experienceSummary'),
-      galleryLabel: pick('galleryLabel'),
-      galleryTitle: pick('galleryTitle'),
-      aboutLabel: pick('aboutLabel'),
-      aboutTitle: pick('aboutTitle'),
-      experienceLabel: pick('experienceLabel'),
-      experienceTitle: pick('experienceTitle'),
-      contactLabel: pick('contactLabel'),
-      contactTitle: pick('contactTitle'),
-    };
+    return publicCopyForLocale(copyByLocale as Record<string, unknown>, hostessCopy as Record<string, unknown>, locale);
   }
 
   const copyHeadline = String(hostessCopy.headline || '').trim();
@@ -451,9 +426,9 @@ function buildContentBundle() {
     hero: {
       en: {
         eyebrow: `Professional Hostess · ${workCities}`,
-        headline: copyFor('en').headline || copyHeadline || 'A first impression that builds trust.',
-        subheadlineIntro: copyFor('en').greeting || copyGreeting || `Hi, I'm ${displayName}!`,
-        subheadline: copyFor('en').profile || heroProfileLine,
+        headline: copyFor('en').headline || 'A first impression that builds trust.',
+        subheadlineIntro: copyFor('en').greeting || `Hi, I'm ${displayName}!`,
+        subheadline: copyFor('en').profile || '',
         cta: 'Get in touch',
         ctaSecondary: 'View portfolio',
       },
@@ -467,9 +442,9 @@ function buildContentBundle() {
       },
       es: {
         eyebrow: `Azafata profesional · ${workCities}`,
-        headline: copyFor('es').headline || copyHeadline || 'Una primera impresión que genera confianza.',
-        subheadlineIntro: copyFor('es').greeting || copyGreeting || `¡Hola, soy ${displayName}!`,
-        subheadline: copyFor('es').profile || heroProfileLine,
+        headline: copyFor('es').headline || 'Una primera impresión que genera confianza.',
+        subheadlineIntro: copyFor('es').greeting || `¡Hola, soy ${displayName}!`,
+        subheadline: copyFor('es').profile || '',
         cta: 'Contactar',
         ctaSecondary: 'Ver portfolio',
       },
@@ -505,8 +480,8 @@ function buildContentBundle() {
       en: {
         label: copyFor('en').aboutLabel || 'About',
         title: copyFor('en').aboutTitle || 'Hospitality as an art',
-        lead: copyFor('en').aboutLead || aboutLeadLine,
-        body: copyFor('en').experienceSummary || aboutBodyLine,
+        lead: copyFor('en').aboutLead || '',
+        body: copyFor('en').experienceSummary || '',
         education: {
           label: 'Studies',
           degrees: buildEducationDegrees('en'),
@@ -533,8 +508,8 @@ function buildContentBundle() {
       es: {
         label: copyFor('es').aboutLabel || 'Sobre mí',
         title: copyFor('es').aboutTitle || 'La hospitalidad como arte',
-        lead: copyFor('es').aboutLead || aboutLeadLine,
-        body: copyFor('es').experienceSummary || aboutBodyLine,
+        lead: copyFor('es').aboutLead || '',
+        body: copyFor('es').experienceSummary || '',
         education: {
           label: 'Estudios',
           degrees: buildEducationDegrees('es'),
@@ -658,6 +633,7 @@ function buildContentBundle() {
 }
 
 function getContentBundle() {
+  // Cache keyed on overlay identity from loadHostess() (ALS), not baked JSON alone.
   const hostess = loadHostess();
   if (_bundle && _bundleRef === hostess) return _bundle;
   _bundleRef = hostess;
